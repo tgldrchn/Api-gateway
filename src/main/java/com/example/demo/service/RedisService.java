@@ -38,10 +38,10 @@ public class RedisService {
                 int start = body.indexOf("\"result\":\"") + 10;
                 int end = body.lastIndexOf("\"");
                 String value = body.substring(start, end);
-                log.info("✅ CACHE HIT: {}", key);
+                log.info("CACHE HIT: {}", key);
                 return value;
             }
-            log.info("❌ CACHE MISS: {}", key);
+            log.info("CACHE MISS: {}", key);
             return null;
         } catch (Exception e) {
             log.error("Redis GET error: {}", e.getMessage());
@@ -49,13 +49,22 @@ public class RedisService {
         }
     }
 
-    // Cache-д хадгалах (60 секунд TTL)
+    // Cache-д хадгалах - body-д явуулна
     public void set(String key, String value) {
         try {
-            String url = redisUrl + "/set/" + encode(key) + "/" + encode(value) + "/ex/60";
-            HttpEntity<Void> entity = new HttpEntity<>(getHeaders());
-            restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-            log.info("💾 CACHE SET: {}", key);
+            String url = redisUrl + "/set/" + encode(key);
+            
+            HttpHeaders headers = getHeaders();
+            // value болон TTL-г array-аар body-д явуулна
+            String jsonBody = "[\"" + value
+                .replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                + "\", \"EX\", \"60\"]";
+            
+            HttpEntity<String> entity = new HttpEntity<>(jsonBody, headers);
+            restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+            log.info("CACHE SET: {}", key);
         } catch (Exception e) {
             log.error("Redis SET error: {}", e.getMessage());
         }
@@ -67,13 +76,17 @@ public class RedisService {
             String url = redisUrl + "/del/" + encode(key);
             HttpEntity<Void> entity = new HttpEntity<>(getHeaders());
             restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-            log.info("🗑️ CACHE DELETE: {}", key);
+            log.info("CACHE DELETE: {}", key);
         } catch (Exception e) {
             log.error("Redis DELETE error: {}", e.getMessage());
         }
     }
 
     private String encode(String value) {
-        return value.replace("/", "%2F").replace(" ", "%20");
+        try {
+            return java.net.URLEncoder.encode(value, "UTF-8");
+        } catch (Exception e) {
+            return value.replace("/", "%2F").replace(" ", "%20");
+        }
     }
 }

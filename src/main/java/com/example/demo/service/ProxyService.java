@@ -37,7 +37,7 @@ public class ProxyService {
             return ResponseEntity.status(404).body("{\"error\":\"No route found for: " + path + "\"}");
         }
 
-        log.info("🔀 PROXY: {} {} -> {}", method, path, targetUrl);
+        log.info("ROXY: {} {} -> {}", method, path, targetUrl);
 
         HttpHeaders headers = copyHeaders(request);
         HttpEntity<String> entity = new HttpEntity<>(body, headers);
@@ -66,7 +66,6 @@ public class ProxyService {
     Enumeration<String> headerNames = request.getHeaderNames();
     while (headerNames.hasMoreElements()) {
         String name = headerNames.nextElement();
-        // ← эдгээрийг хасна
         if (!name.equalsIgnoreCase("host") && 
             !name.equalsIgnoreCase("accept-encoding")) {
             headers.set(name, request.getHeader(name));

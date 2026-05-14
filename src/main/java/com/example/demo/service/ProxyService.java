@@ -62,14 +62,16 @@ public class ProxyService {
     }
 
     private HttpHeaders copyHeaders(HttpServletRequest request) {
-        HttpHeaders headers = new HttpHeaders();
-        Enumeration<String> headerNames = request.getHeaderNames();
-        while (headerNames.hasMoreElements()) {
-            String name = headerNames.nextElement();
-            if (!name.equalsIgnoreCase("host")) {
-                headers.set(name, request.getHeader(name));
-            }
+    HttpHeaders headers = new HttpHeaders();
+    Enumeration<String> headerNames = request.getHeaderNames();
+    while (headerNames.hasMoreElements()) {
+        String name = headerNames.nextElement();
+        // ← эдгээрийг хасна
+        if (!name.equalsIgnoreCase("host") && 
+            !name.equalsIgnoreCase("accept-encoding")) {
+            headers.set(name, request.getHeader(name));
         }
-        return headers;
     }
+    return headers;
+}
 }

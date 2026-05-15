@@ -1,3 +1,5 @@
+package com.example.demo.service;
+
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.core.io.ByteArrayResource;
